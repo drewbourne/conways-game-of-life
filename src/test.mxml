@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application 
+    xmlns:mx="http://www.adobe.com/2006/mxml" 
+    layout="absolute"
+    creationComplete="go()">
+    
+    <mx:Script>
+        <![CDATA[
+            import org.flexunit.internals.TraceListener;
+            import conways.ConwaysGameOfLifeSuite;
+            import mockolate.runner.MockolateRunner;
+            import org.flexunit.runner.FlexUnitCore;
+            
+            private var runners:Array = [ MockolateRunner ];
+            
+            private var core:FlexUnitCore;
+        
+            private function go():void 
+            {
+                core = new FlexUnitCore;
+                core.addListener(new TraceListener());
+                core.run( ConwaysGameOfLifeSuite );    
+            }
+        ]]>
+    </mx:Script>
+    
+</mx:Application>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet
+    xmlns="rules.*"
+    xmlns:h="http://hamcrest.org/2009/mxml" 
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+    
+    <mx:Script>
+	<![CDATA[
+		import org.hamcrest.number.lessThan;
+		// facts
+		
+		[Bindable]
+		public function get cell():Cell
+		{
+			return _cell;
+		}
+		
+		public function set cell(value:Cell):void 
+		{
+			_cell = value;
+		}
+		
+		private var _cell:Cell;
+		
+		private function queueNextCellState(cellState:CellState):void 
+		{ 
+			if (cell)
+				cell.queueNextCellState(cellState);
+		}
+	]]>
+	</mx:Script>
+	
+	<rules>
+    	<Rule name="kill the lonely">
+    		<when>
+				<h:HasProperties 
+					target="{ cell }" 
+					properties="{{ numLiveNeighbours: lessThan(3), cellState: CellState.LIVE }}"
+    		</when>
+    		<then>
+    			<Invoker method="queueNextCellState" arguments="{[ CellState.DEAD ]}" />
+    		</then>
+    	</Rule>
+		
+    	<Rule name="kill the overcrowded">
+    		<when>
+				<h:HasProperties 
+					target="{ cell }" 
+					properties="{{ numLiveNeighbours: greaterThan(3), cellState: CellState.LIVE }}"
+				
+    			<h:EqualTo target="{ cell.cellState }" value="{ CellState.LIVE }" />
+    			<h:GreaterThan target="{ cell.numLiveNeighbours }" value="{ 2 }" />
+    		</when>
+    		<then>
+				<Invoker method="queueNextCellState" arguments="{[ CellState.DEAD ]}" />
+    		</then>		
+    	</Rule>
+    	
+    	<Rule name="give birth">
+    		<when>
+    			<h:EqualTo target="{ cell.cellState }" value="{ CellState.DEAD }" />
+    			<h:EqualTo target="{ cell.numLiveNeighbours }" value="{ 3 }" />
+    		</when>
+    		<then>
+				<Invoker method="queueNextCellState" arguments="{[ CellState.LIVE ]}" />
+    		</then>
+    	</Rule>
+	
+    </rules>
+</RuleSet>

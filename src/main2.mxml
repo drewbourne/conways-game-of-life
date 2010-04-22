@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application 
+    xmlns:mx="http://www.adobe.com/2006/mxml" 
+    layout="absolute"
+	frameRate="120"
+	backgroundColor="#FFFFFF"
+    creationComplete="go()">
+    
+    <mx:Script>
+        <![CDATA[
+			import asx.array.every;
+			import asx.array.forEach;
+			import asx.array.mapSequentially;
+			import asx.string.substitute;
+			
+			import conways.Cell;
+			import conways.CellState;
+			import conways.ConwaysGameOfLifeRules;
+			import conways.Grid;
+			
+			import flash.utils.setInterval;
+			import flash.utils.setTimeout;
+
+            [Bindable]
+            public var grid:Grid;
+            public var gridRows:int;
+			public var gridCols:int;
+			
+            public var rules:ConwaysGameOfLifeRules;
+			
+			[Bindable]
+			public var generation:int = 0;
+
+			private var timer:Timer;
+			private var bitmapData:BitmapData;
+			private var bitmap:Bitmap;
+			private var rect:Rectangle;
+			
+            public function go():void 
+            {
+				gridRows = 16;
+				gridCols = 16;
+				
+                grid = new Grid(gridRows, gridCols);
+                
+                rules = new ConwaysGameOfLifeRules();
+				
+				bitmapData = new BitmapData(gridRows, gridCols, false, 0x00000000);
+				bitmap = new Bitmap(bitmapData, PixelSnapping.AUTO, false);
+				rect = new Rectangle(0, 0, gridRows, gridCols);
+				
+				bitmap.scaleX = 30;
+				bitmap.scaleY = 30;
+				bitmap.x = 50;
+				bitmap.y = 50
+				
+				container.rawChildren.addChild(bitmap);
+                
+				timer = new Timer(100);
+				timer.addEventListener(TimerEvent.TIMER, tick);
+				timer.start();
+            }
+			
+			public function tick(event:TimerEvent = null):void 
+			{
+				updateCells();
+				renderCells();
+			}
+			
+			public function updateCells():void 
+			{
+				generation++;
+				
+				var init:int = getTimer();
+				var start:int = init;
+				var split:int = start;
+				        
+				// assert facts to the rule set
+				for each (var cell:Cell in grid.cells)
+				{
+                    rules.cell = cell;
+
+//					start = split;
+//					split = getTimer()
+//					trace("cell", split - start, split - init);
+				}
+
+				// revoke facts
+				rules.cell = null;
+				
+				start = split;
+				split = getTimer()
+				trace("rules", split - start, split - init);
+				
+				// trigger the queued updates
+				grid.update();
+				
+				start = split;
+				split = getTimer()
+				trace("grid", split - start, split - init);
+				
+				var allDead:Boolean = true;
+				for each (cell in grid.cells)
+				{
+					if (cell.cellState == CellState.LIVE)
+					{
+						allDead = false;
+						break;
+					}
+				}
+				
+				if (allDead)
+					timer.stop();
+            }
+
+			public var colors:Array = [
+//				0xFF111111,
+				0xFF222222,
+//				0xFF333333,
+				0xFF444444,
+//				0xFF555555,
+				0xFF666666,
+//				0xFF777777,
+				0xFF888888,
+//				0xFF999999,
+				0xFFAAAAAA,
+//				0xFFBBBBBB,
+				0xFFCCCCCC,
+//				0xFFDDDDDD,
+				0xFFEEEEEE,
+				0xFFFFFFFF,
+			];
+			
+			public function renderCells():void 
+			{
+				bitmapData.lock();
+				bitmapData.fillRect(rect, 0xFF000000);
+				
+				for each (var cell:Cell in grid.cells)
+				{
+					if (cell.cellState == CellState.LIVE)					
+					{
+						bitmapData.setPixel32(cell.column, cell.row, colors[cell.numLiveNeighbours]);
+//						bitmapData.setPixel32(cell.column, cell.row, 0xFFFF3333);
+					}
+				}
+				
+				bitmapData.unlock();
+			}
+        ]]>
+    </mx:Script>
+	
+	<mx:VBox id="container" 
+			 width="100%" 
+			 height="100%" 
+			 paddingTop="10" 
+			 paddingLeft="10" 
+			 paddingRight="10"
+			 paddingBottom="10">
+		
+		<mx:Label text="generation { generation }" fontSize="24" fontFamily="Helvetica" />
+		
+	</mx:VBox>
+    
+</mx:Application>

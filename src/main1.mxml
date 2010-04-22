@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application 
+    xmlns:mx="http://www.adobe.com/2006/mxml" 
+    layout="absolute"
+	frameRate="60"
+    creationComplete="go()">
+    
+    <mx:Script>
+        <![CDATA[
+			import asx.array.forEach;
+			import asx.array.mapSequentially;
+			import asx.string.substitute;
+			
+			import conways.Cell;
+			import conways.ConwaysGameOfLifeRules;
+			import conways.Grid;
+			
+			import flash.utils.setInterval;
+			import flash.utils.setTimeout;
+
+            [Bindable]
+            public var grid:Grid;
+            
+            public var rules:ConwaysGameOfLifeRules;
+			
+			[Bindable]
+			public var generation:int = 0;
+
+			private var timer:Timer;
+			
+            public function go():void 
+            {
+                grid = new Grid(20, 20);
+                
+                rules = new ConwaysGameOfLifeRules();
+                
+				timer = new Timer(200);
+				timer.addEventListener(TimerEvent.TIMER, tick);
+				timer.start();
+            }
+			
+			public function tick(event:TimerEvent = null):void 
+			{
+				update();
+			}
+            
+            public function update():void 
+            {
+				generation++;
+				
+                trace('update ' + generation);
+                
+//                mapSequentially(grid.cells,
+				for each (var cell:Cell in grid.cells)
+				{
+//					function(cell:Cell, next:Function):void {
+//						trace("assert   cell", cell);
+						
+	                    // assert that fact to the rules.
+	                    rules.cell = cell;
+						
+//						setTimeout(function(cell:Cell):void {
+//						trace("asserted cell", cell);
+//						next(cell);
+//						}, 10, cell);
+//	                },
+				}
+//					function(cells:Array):void {
+//						trace("update cells");
+						
+						// revoke all asserted facts
+						rules.cell = null;
+						
+						grid.update();
+						
+						trace("updated cells");
+//					}); 
+            }    
+
+            
+            public function cellLabel(cell:Cell):String 
+            {
+//				return cell.toString();				
+                return substitute("{0},{1} {2} {3}", cell.row, cell.column, cell.cellState, cell.nextCellState);
+            } 
+        ]]>
+    </mx:Script>
+	
+	<mx:VBox width="100%" height="100%">
+		
+		<mx:Label text="generation { generation }" />
+		
+		<!--
+		<mx:TileList 
+			rowCount="20"
+			columnCount="20"
+			rowHeight="20"
+			columnWidth="20"
+			horizontalScrollPolicy="off"
+			verticalScrollPolicy="off"
+			paddingTop="0"
+			paddingLeft="0"
+			paddingRight="0"
+			paddingBottom="0"
+			dataProvider="{ grid.cells }" 
+			labelFunction="{ cellLabel }">
+			<mx:itemRenderer>
+				<mx:Component>
+					<mx:Canvas>
+						<mx:Script>
+							<![CDATA[
+								import conways.Cell;
+								import conways.CellState;
+								
+								[Bindable("dataChange")]
+								public function get cell():Cell
+								{
+									return data as Cell;
+								}
+								
+								override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+								{
+									graphics.clear();
+									
+									if (cell.cellState == CellState.LIVE)
+									{
+										graphics.beginFill(0xFF3333, 1.0);
+										graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
+										graphics.endFill();
+									}
+								}
+							]]>
+						</mx:Script>
+					</mx:Canvas>
+				</mx:Component>
+			</mx:itemRenderer>
+		</mx:TileList>
+		-->
+		
+		<!--
+	    <mx:List
+	        width="100%"
+	        height="100%"
+	        rowCount="10"
+	        dataProvider="{ grid.cells }"
+	        labelFunction="{ cellLabel }" />
+		-->
+		
+	</mx:VBox>
+    
+</mx:Application>
